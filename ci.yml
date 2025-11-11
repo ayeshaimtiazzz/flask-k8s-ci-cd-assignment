@@ -1,0 +1,12 @@
+name: CI
+on:
+  push:
+    branches:
+      - '**'
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Placeholder
+        run: echo "CI workflow will be added later"
