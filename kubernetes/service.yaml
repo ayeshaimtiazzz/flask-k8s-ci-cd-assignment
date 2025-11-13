@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-app-service
+spec:
+  type: NodePort   # Load balancing type
+  selector:
+    app: flask-app
+  ports:
+    - protocol: TCP
+      port: 5000       # Service port
+      targetPort: 5000 # Container port
+      nodePort: 30007  # NodePort (30000–32767 range)
