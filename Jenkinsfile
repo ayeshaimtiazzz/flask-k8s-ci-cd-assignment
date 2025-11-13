@@ -1,45 +1,49 @@
 pipeline {
     agent any
+
     environment {
-        DOCKER_IMAGE = 'your-registry/flask-app'  // Replace with your Docker registry
-        KUBECONFIG = credentials('kubeconfig')  // Jenkins credential for K8s config
+        DOCKER_IMAGE = "flask-app"
+        KUBE_CONFIG = "$HOME/.kube/config"
     }
+
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("${DOCKER_IMAGE}:${env.BUILD_NUMBER}")
+                    echo "Building Docker image..."
+                    sh 'docker build -t ${DOCKER_IMAGE}:latest .'
                 }
             }
         }
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry('https://your-registry', 'docker-credentials') {  // Replace with your registry and Jenkins credential ID
-                        docker.image("${DOCKER_IMAGE}:${env.BUILD_NUMBER}").push()
-                        docker.image("${DOCKER_IMAGE}:${env.BUILD_NUMBER}").push('latest')
-                    }
-                }
-            }
-        }
+
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh 'kubectl apply -f kubernetes/deployment.yaml'
-                    sh 'kubectl apply -f kubernetes/service.yaml'
-                    sh 'kubectl set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${BUILD_NUMBER}'
+                    echo "Deploying to Kubernetes..."
+                    // Apply all manifests from the kubernetes/ directory
+                    sh 'kubectl apply -f kubernetes/'
+                }
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                script {
+                    echo "Verifying rollout status..."
+                    sh 'kubectl rollout status deployment/flask-app-deployment'
+                    echo "Checking pods and services..."
+                    sh 'kubectl get pods,services'
                 }
             }
         }
     }
+
     post {
-        always {
-            cleanWs()
+        success {
+            echo "✅ Deployment pipeline completed successfully!"
+        }
+        failure {
+            echo "❌ Deployment pipeline failed. Check logs."
         }
     }
 }
