@@ -1,173 +1,156 @@
-# Flask Application Deployment using Docker, Jenkins, and Kubernetes
+🚀 Flask Application Deployment using Docker, Jenkins, and Kubernetes
 
-This project demonstrates a complete CI/CD workflow for deploying a Flask-based web application using **Docker**, **Jenkins**, and **Kubernetes**.  
-The goal of the project is to show automated build, deploy, scaling, and rollout mechanisms using modern DevOps tools.
+This project demonstrates a complete CI/CD pipeline for deploying a Flask application using Docker, Jenkins, and Kubernetes.
+The pipeline automatically builds, deploys, scales, and manages rollouts whenever changes are pushed to the main branch.
 
----
+📌 Project Overview
 
-# 🚀 Project Overview
+This repository includes:
 
-This repository contains:  
-- A simple **Flask API application**  
-- A **Dockerfile** for containerization  
-- Kubernetes manifests (`Deployment` + `Service`)  
-- A **Jenkins Pipeline (Jenkinsfile)** to automate deployment  
-- A fully functional CI/CD flow that updates Kubernetes automatically whenever changes are pushed to the repository
+A simple Flask application
 
-The project demonstrates end-to-end automation starting from GitHub commits to Jenkins-triggered Kubernetes deployments.
+A Dockerfile for containerization
 
----
+Kubernetes manifests (Deployment + Service)
 
-# ☸ Kubernetes Features Used
+A Jenkins Declarative Pipeline
 
-This project uses several key Kubernetes features:
+Full CI/CD automation triggered by GitHub pull request merges
 
-### **1. Deployments**
-- Ensures **declarative application updates**
-- Supports **rolling updates** and **rollbacks**
-- Manages ReplicaSets automatically
+The workflow ensures that every code change is tested, built, and deployed to a Kubernetes cluster automatically.
 
-### **2. ReplicaSets**
-- Guarantees the correct number of application pods are running
-- Recreates pods when they crash or fail
+☸ Kubernetes Features Used
+1. Deployments
 
-### **3. Services (NodePort)**
-- Exposes the Flask application outside the cluster
-- Provides **load balancing** across multiple pods
+Declarative updates using YAML
 
-### **4. Pods**
-- Smallest deployable units running the Flask container
+Automatic rollouts and rollbacks
 
-### **5. Automated Rollouts**
-- Whenever Jenkins applies a new Deployment, Kubernetes performs:
-  - Rolling update
-  - Health checks
-  - Zero-downtime deployment
-  - Auto rollback on failures
+Ensures the desired number of replicas stay running
 
-### **6. Scaling**
-- Application can be scaled horizontally:
-```bash
+2. ReplicaSets
+
+Maintains the correct number of pod replicas
+
+Recreates failed pods automatically
+
+3. Pods
+
+Basic compute units running the Flask container
+
+4. Services (NodePort)
+
+Exposes the application outside the Kubernetes cluster
+
+Provides load balancing across pods
+
+5. Automated Rollouts
+
+Triggered when deployment configuration changes:
+
+Rolling updates
+
+Zero downtime deployment
+
+Automatic rollback on failure
+
+6. Scaling
+
+Horizontal scaling:
+
 kubectl scale deployment flask-app-deployment --replicas=3
-Kubernetes distributes pods across the cluster automatically
 
-7. Self-healing
+
+Kubernetes:
+
+Automatically adds/removes pods
+
+Distributes load automatically
+
+7. Self-Healing
 
 If a pod crashes:
 
-Kubernetes restarts it automatically
+Kubernetes restarts it
 
-Ensures minimum number of pods always stay alive
+Ensures desired replicas always run
 
-🐳 Running the Application Locally Using Docker
-
-Follow these steps to run the Flask app on your local machine:
-
-1. Build the Docker Image
+🐳 Run the Flask App Locally Using Docker
+1. Build the Docker image
 docker build -t flask-app:latest .
 
-2. Run the Docker Container
+2. Run the container
 docker run -p 5000:5000 flask-app:latest
 
-3. Test the App
+3. Test in browser
 
-Open your browser and visit:
+Visit:
 
 http://localhost:5000
 
+☸ Deploying to Kubernetes Using Jenkins Pipeline
 
-If you see the Flask response, the app is running successfully in Docker.
-
-☸ Deploying to Kubernetes using Jenkins Pipeline
-
-This project uses a Jenkins Declarative Pipeline defined in the Jenkinsfile.
-
-The pipeline performs:
+This project uses a Jenkins Declarative Pipeline defined in Jenkinsfile.
 
 🧱 Pipeline Stages
 Stage 1 — Build Docker Image
 
-Jenkins builds the container image:
+Jenkins builds the image:
 
 docker build -t flask-app:latest .
 
 Stage 2 — Deploy to Kubernetes
 
-Jenkins applies all manifests in the /kubernetes directory:
+Jenkins applies all configuration files:
 
 kubectl apply -f kubernetes/
 
 
-This creates or updates:
+Creates or updates:
 
 Deployment
 
 Service
 
 Stage 3 — Verify Rollout
-
-Jenkins ensures the deployment is successful:
-
 kubectl rollout status deployment/flask-app-deployment
 kubectl get pods,svc
 
-🌀 Automated Rollouts, Scaling, and Load Balancing
 
-Kubernetes provides several built-in automation features that make this deployment resilient and scalable.
+Ensures that the deployment is healthy.
 
+🌀 Automated Rollouts, Scaling & Load Balancing
 🔁 Automated Rollouts
 
-Kubernetes performs rolling updates:
+On every update:
 
-New pods are created one-by-one
+New pods are created gradually
 
-Old pods are removed gradually
+Old pods are terminated gracefully
 
-Ensures zero downtime
+Zero downtime
 
-If something goes wrong → automatic rollback
-
-This is triggered every time Jenkins deploys updated configuration using:
-
-kubectl apply -f kubernetes/
+Rollback on error
 
 📈 Scaling
-
-You can scale the application horizontally:
-
 kubectl scale deployment flask-app-deployment --replicas=4
 
 
 Kubernetes:
 
-Creates additional pods
+Creates more pods
 
-Distributes load evenly
-
-Removes pods when scaling down
-
-Scaling is completely dynamic and does not require downtime.
+Removes extra pods when scaling down
 
 ⚖ Load Balancing
 
-The Kubernetes Service (NodePort) automatically load-balances traffic across all healthy pods.
+The NodePort service:
 
-For example, if 3 pods are running:
+Distributes traffic automatically
 
-Users → Service → Pod 1 / Pod 2 / Pod 3
+Sends traffic only to healthy pods
 
-
-If a pod fails → Service stops sending traffic to it
-
-If a new pod is added → It is registered automatically
-
-This ensures:
-
-High availability
-
-Balanced traffic
-
-Zero manual configurations
+Registers new pods without manual config
 
 📂 Repository Structure
 📁 root
@@ -182,34 +165,42 @@ Zero manual configurations
 
 🚀 CI/CD Workflow Summary
 
-Developer pushes code → GitHub
+Developer pushes code to GitHub
 
-Webhook triggers Jenkins
+Pull Request created → reviewed → merged
 
-Jenkins pulls the latest code
+GitHub webhook triggers Jenkins
 
-Jenkins builds Docker image
+Jenkins pulls the latest commit
 
-Jenkins deploys to Kubernetes
+Docker image is built
 
-Kubernetes rolls out updates
+Kubernetes manifests are applied
 
-Pipeline verifies the deployment
+Kubernetes performs rolling update
 
-Application becomes available via NodePort
+Deployment is verified
+
+Application becomes available on NodePort
 
 ✔ Final Notes
 
-This project demonstrates a complete DevOps pipeline integrating:
+This project demonstrates a complete cloud-native CI/CD system using:
 
-Docker containerization
+Docker
 
-Git workflows
+GitHub workflow
 
-Jenkins-based CI/CD automation
+Jenkins automation
 
 Kubernetes orchestration
 
-Autoscaling, load balancing, and rollout automation
+Load balancing
 
-It is a modern industry-standard architecture used for cloud-native applications.
+Auto-scaling
+
+Self-healing
+
+Rolling updates
+
+This architecture is commonly used in production environments for modern microservices.
