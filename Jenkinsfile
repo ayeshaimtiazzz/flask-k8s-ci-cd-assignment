@@ -3,7 +3,8 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "flask-app"
-        KUBE_CONFIG = "$HOME/.kube/config"
+        KUBECONFIG = "C:/Users/aimte/.kube/config"
+        PATH = "C:/Program Files/Docker/Docker/resources/bin;${env.PATH}"
     }
 
     stages {
@@ -11,7 +12,9 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image..."
-                    sh 'docker build -t ${DOCKER_IMAGE}:latest .'
+                    bat """
+                    docker build -t %DOCKER_IMAGE%:latest .
+                    """
                 }
             }
         }
@@ -20,8 +23,9 @@ pipeline {
             steps {
                 script {
                     echo "Deploying to Kubernetes..."
-                    // Apply all manifests from the kubernetes/ directory
-                    sh 'kubectl apply -f kubernetes/'
+                    bat """
+                    kubectl apply -f kubernetes/
+                    """
                 }
             }
         }
@@ -30,9 +34,10 @@ pipeline {
             steps {
                 script {
                     echo "Verifying rollout status..."
-                    sh 'kubectl rollout status deployment/flask-app-deployment'
-                    echo "Checking pods and services..."
-                    sh 'kubectl get pods,services'
+                    bat """
+                    kubectl rollout status deployment/flask-app-deployment
+                    kubectl get pods,services
+                    """
                 }
             }
         }
